@@ -1,0 +1,864 @@
+{
+ "Resources": {
+  "AttestationApi6E90794F": {
+   "Type": "AWS::ApiGatewayV2::Api",
+   "Properties": {
+    "Name": "HardwareAttestationAPi",
+    "ProtocolType": "HTTP"
+   },
+   "Metadata": {
+    "aws:cdk:path": "AttestationInfraStack/AttestationApi/Resource"
+   }
+  },
+  "AttestationApiDefaultStage67DF2DD2": {
+   "Type": "AWS::ApiGatewayV2::Stage",
+   "Properties": {
+    "ApiId": {
+     "Ref": "AttestationApi6E90794F"
+    },
+    "AutoDeploy": true,
+    "StageName": "$default"
+   },
+   "Metadata": {
+    "aws:cdk:path": "AttestationInfraStack/AttestationApi/DefaultStage/Resource"
+   }
+  },
+  "AttestationApiPOSTattestationchallengeChallengeIntegration95E64DFB": {
+   "Type": "AWS::ApiGatewayV2::Integration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "AttestationApi6E90794F"
+    },
+    "IntegrationType": "AWS_PROXY",
+    "IntegrationUri": {
+     "Fn::GetAtt": [
+      "ChallengeEndpointChallengeHandlerB45C4C51",
+      "Arn"
+     ]
+    },
+    "PayloadFormatVersion": "2.0"
+   },
+   "Metadata": {
+    "aws:cdk:path": "AttestationInfraStack/AttestationApi/POST--attestation--challenge/ChallengeIntegration/Resource"
+   }
+  },
+  "AttestationApiPOSTattestationchallengeChallengeIntegrationPermission63209B69": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "ChallengeEndpointChallengeHandlerB45C4C51",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:",
+       {
+        "Ref": "AWS::Region"
+       },
+       ":",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "AttestationApi6E90794F"
+       },
+       "/*/*/attestation/challenge"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "AttestationInfraStack/AttestationApi/POST--attestation--challenge/ChallengeIntegration-Permission"
+   }
+  },
+  "AttestationApiPOSTattestationchallenge7469D6A4": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "AttestationApi6E90794F"
+    },
+    "AuthorizationType": "NONE",
+    "RouteKey": "POST /attestation/challenge",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "AttestationApiPOSTattestationchallengeChallengeIntegration95E64DFB"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "AttestationInfraStack/AttestationApi/POST--attestation--challenge/Resource"
+   }
+  },
+  "AttestationApiPOSTverifyVerifyIntegrationAE7D6A26": {
+   "Type": "AWS::ApiGatewayV2::Integration",
+   "Properties": {
+    "ApiId": {
+     "Ref": "AttestationApi6E90794F"
+    },
+    "IntegrationType": "AWS_PROXY",
+    "IntegrationUri": {
+     "Fn::GetAtt": [
+      "VerificationEndpointVerifyHandler992E77DC",
+      "Arn"
+     ]
+    },
+    "PayloadFormatVersion": "2.0"
+   },
+   "Metadata": {
+    "aws:cdk:path": "AttestationInfraStack/AttestationApi/POST--verify/VerifyIntegration/Resource"
+   }
+  },
+  "AttestationApiPOSTverifyVerifyIntegrationPermission9F0B2046": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "VerificationEndpointVerifyHandler992E77DC",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":execute-api:",
+       {
+        "Ref": "AWS::Region"
+       },
+       ":",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "AttestationApi6E90794F"
+       },
+       "/*/*/verify"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "AttestationInfraStack/AttestationApi/POST--verify/VerifyIntegration-Permission"
+   }
+  },
+  "AttestationApiPOSTverifyF9E7A94F": {
+   "Type": "AWS::ApiGatewayV2::Route",
+   "Properties": {
+    "ApiId": {
+     "Ref": "AttestationApi6E90794F"
+    },
+    "AuthorizationType": "NONE",
+    "RouteKey": "POST /verify",
+    "Target": {
+     "Fn::Join": [
+      "",
+      [
+       "integrations/",
+       {
+        "Ref": "AttestationApiPOSTverifyVerifyIntegrationAE7D6A26"
+       }
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "AttestationInfraStack/AttestationApi/POST--verify/Resource"
+   }
+  },
+  "DatabaseAttestationNoncesAC5D49CA": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "nonce",
+      "AttributeType": "S"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "KeySchema": [
+     {
+      "AttributeName": "nonce",
+      "KeyType": "HASH"
+     }
+    ],
+    "TimeToLiveSpecification": {
+     "AttributeName": "expiresAt",
+     "Enabled": true
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "AttestationInfraStack/Database/AttestationNonces/Resource"
+   }
+  },
+  "DatabaseDeviceKeys5CF31B29": {
+   "Type": "AWS::DynamoDB::Table",
+   "Properties": {
+    "AttributeDefinitions": [
+     {
+      "AttributeName": "userId",
+      "AttributeType": "S"
+     },
+     {
+      "AttributeName": "deviceId",
+      "AttributeType": "S"
+     }
+    ],
+    "BillingMode": "PAY_PER_REQUEST",
+    "KeySchema": [
+     {
+      "AttributeName": "userId",
+      "KeyType": "HASH"
+     },
+     {
+      "AttributeName": "deviceId",
+      "KeyType": "RANGE"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "AttestationInfraStack/Database/DeviceKeys/Resource"
+   }
+  },
+  "ChallengeEndpointChallengeHandlerServiceRoleA73AD850": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "AttestationInfraStack/ChallengeEndpoint/ChallengeHandler/ServiceRole/Resource"
+   }
+  },
+  "ChallengeEndpointChallengeHandlerServiceRoleDefaultPolicyE4BE38FF": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchWriteItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "DatabaseAttestationNoncesAC5D49CA",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "ChallengeEndpointChallengeHandlerServiceRoleDefaultPolicyE4BE38FF",
+    "Roles": [
+     {
+      "Ref": "ChallengeEndpointChallengeHandlerServiceRoleA73AD850"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "AttestationInfraStack/ChallengeEndpoint/ChallengeHandler/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "ChallengeEndpointChallengeHandlerB45C4C51": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Architectures": [
+     "arm64"
+    ],
+    "Code": {
+     "S3Bucket": {
+      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+     },
+     "S3Key": "90fca614c4cc07370e9f1b6e224f19115375dfcac0194f5bc5f7a6f475ec54d7.zip"
+    },
+    "Environment": {
+     "Variables": {
+      "NONCE_TABLE_NAME": {
+       "Ref": "DatabaseAttestationNoncesAC5D49CA"
+      }
+     }
+    },
+    "Handler": "bootstrap",
+    "Role": {
+     "Fn::GetAtt": [
+      "ChallengeEndpointChallengeHandlerServiceRoleA73AD850",
+      "Arn"
+     ]
+    },
+    "Runtime": "provided.al2",
+    "Timeout": 5
+   },
+   "DependsOn": [
+    "ChallengeEndpointChallengeHandlerServiceRoleDefaultPolicyE4BE38FF",
+    "ChallengeEndpointChallengeHandlerServiceRoleA73AD850"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "AttestationInfraStack/ChallengeEndpoint/ChallengeHandler/Resource",
+    "aws:asset:path": "asset.90fca614c4cc07370e9f1b6e224f19115375dfcac0194f5bc5f7a6f475ec54d7",
+    "aws:asset:is-bundled": true,
+    "aws:asset:property": "Code"
+   }
+  },
+  "ChallengeEndpointChallengeHandlerLogGroup1F898626": {
+   "Type": "AWS::Logs::LogGroup",
+   "Properties": {
+    "LogGroupName": {
+     "Fn::Join": [
+      "",
+      [
+       "/aws/lambda/",
+       {
+        "Ref": "ChallengeEndpointChallengeHandlerB45C4C51"
+       }
+      ]
+     ]
+    },
+    "RetentionInDays": 731
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "AttestationInfraStack/ChallengeEndpoint/ChallengeHandler/LogGroup/Resource"
+   }
+  },
+  "VerificationEndpointVerifyHandlerServiceRoleF92BD5F2": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "AttestationInfraStack/VerificationEndpoint/VerifyHandler/ServiceRole/Resource"
+   }
+  },
+  "VerificationEndpointVerifyHandlerServiceRoleDefaultPolicy6B7BCCC2": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:BatchGetItem",
+        "dynamodb:BatchWriteItem",
+        "dynamodb:ConditionCheckItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:DescribeTable",
+        "dynamodb:GetItem",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:PutItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:UpdateItem"
+       ],
+       "Effect": "Allow",
+       "Resource": [
+        {
+         "Fn::GetAtt": [
+          "DatabaseAttestationNoncesAC5D49CA",
+          "Arn"
+         ]
+        },
+        {
+         "Fn::GetAtt": [
+          "DatabaseDeviceKeys5CF31B29",
+          "Arn"
+         ]
+        }
+       ]
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "VerificationEndpointVerifyHandlerServiceRoleDefaultPolicy6B7BCCC2",
+    "Roles": [
+     {
+      "Ref": "VerificationEndpointVerifyHandlerServiceRoleF92BD5F2"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "AttestationInfraStack/VerificationEndpoint/VerifyHandler/ServiceRole/DefaultPolicy/Resource"
+   }
+  },
+  "VerificationEndpointVerifyHandler992E77DC": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": {
+      "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
+     },
+     "S3Key": "9f680e33a4ba5d4ff06e433af7d66767bbcca5ca9907af6cab3c90d2edc405f5.jar"
+    },
+    "Environment": {
+     "Variables": {
+      "DEVICE_KEYS_TABLE_NAME": {
+       "Ref": "DatabaseDeviceKeys5CF31B29"
+      },
+      "NONCE_TABLE_NAME": {
+       "Ref": "DatabaseAttestationNoncesAC5D49CA"
+      }
+     }
+    },
+    "Handler": "com.example.VerifyHandler",
+    "MemorySize": 1024,
+    "Role": {
+     "Fn::GetAtt": [
+      "VerificationEndpointVerifyHandlerServiceRoleF92BD5F2",
+      "Arn"
+     ]
+    },
+    "Runtime": "java21",
+    "Timeout": 10
+   },
+   "DependsOn": [
+    "VerificationEndpointVerifyHandlerServiceRoleDefaultPolicy6B7BCCC2",
+    "VerificationEndpointVerifyHandlerServiceRoleF92BD5F2"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "AttestationInfraStack/VerificationEndpoint/VerifyHandler/Resource",
+    "aws:asset:path": "asset.9f680e33a4ba5d4ff06e433af7d66767bbcca5ca9907af6cab3c90d2edc405f5.jar",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "VerificationEndpointVerifyHandlerLogGroup70408D7E": {
+   "Type": "AWS::Logs::LogGroup",
+   "Properties": {
+    "LogGroupName": {
+     "Fn::Join": [
+      "",
+      [
+       "/aws/lambda/",
+       {
+        "Ref": "VerificationEndpointVerifyHandler992E77DC"
+       }
+      ]
+     ]
+    },
+    "RetentionInDays": 731
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "AttestationInfraStack/VerificationEndpoint/VerifyHandler/LogGroup/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/91U32vbMBD+W6rHoahZChvkaU7JurJuy5LsYZgSLpbqqpElI50TPOH/vUi2QkYhjNKnPRjpvu9+fOdDN2GTDx+ZH1/AwY0KvhspuWV+hVDsKBzcxkMtS0BxgHY/Yf4LYp3VMifvCB2+e3r9oLNa0sCtEEqRJzRaEV+aBkV+jAjQrUZRWkBpdH6a6gQPZozsqIJqy4H56we9ELaSzg3850YX0Tddck9so1FWgkxj3kfQXAk7WIXhiahEZWy7kn8SEIJMg4Ml9F5aoyuhe6SjngDn81P4qPw8ed9R3mqoDN8yv4atErknNViUQfFX0ZKpJxqOkrGtw3VFul7U2tzJvcgQrdw2mLysqMwe1MIoWbRkSrhwaE1LKNlKpaQuv/W9LrLfm8V8uVnOf/6ar9axkX8s7ozF8x6vFhGHHf9FRyVUzC9N/C3gXFMJPotFayt1IWtQWVGYRqfR9D4hIIszH+ZDKtBQCh7FSOHINPd/YW1mB980sLVZpBKphdwPLCIUj7daSS2O3HHWZ8n/oIXzeV/L3vdPWgnaw/GJJClrE5gXCl/CnK8QUIRX5lLZN0v0FnBss++wo+5qA84JdCwLB3VXbNYUO4EzcCc7UZnSMX9nyhtrmjr3RA3X7+nhhWovwVgrhXUdXQpnGlucZI5lwy6WugzOPxqsG+zoeASqfgQ2vvg0bP/LcPardlSagb4xx9V6uvY7qg0X7Mld7icTNrli7y+enJSjYfmyZX8+A4uXMEthBgAA"
+   },
+   "Metadata": {
+    "aws:cdk:path": "AttestationInfraStack/CDKMetadata/Default"
+   },
+   "Condition": "CDKMetadataAvailable"
+  }
+ },
+ "Outputs": {
+  "ApiUrl": {
+   "Description": "HTTP API Gateway base endpoint URL",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Ref": "AttestationApi6E90794F"
+      },
+      ".execute-api.",
+      {
+       "Ref": "AWS::Region"
+      },
+      ".",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/"
+     ]
+    ]
+   }
+  }
+ },
+ "Conditions": {
+  "CDKMetadataAvailable": {
+   "Fn::Or": [
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "af-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-northeast-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-northeast-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-northeast-3"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-south-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-3"
+       ]
+      }
+     ]
+    },
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ap-southeast-4"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ca-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "ca-west-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "cn-north-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "cn-northwest-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-central-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-north-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-south-2"
+       ]
+      }
+     ]
+    },
+    {
+     "Fn::Or": [
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "eu-west-3"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "il-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "me-central-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "me-south-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "sa-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-east-1"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-east-2"
+       ]
+      },
+      {
+       "Fn::Equals": [
+        {
+         "Ref": "AWS::Region"
+        },
+        "us-west-1"
+       ]
+      }
+     ]
+    },
+    {
+     "Fn::Equals": [
+      {
+       "Ref": "AWS::Region"
+      },
+      "us-west-2"
+     ]
+    }
+   ]
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}
