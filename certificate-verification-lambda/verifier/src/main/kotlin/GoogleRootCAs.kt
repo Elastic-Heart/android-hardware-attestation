@@ -2,7 +2,6 @@ package org.example
 
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
-import java.util.Base64
 
 object GoogleRootCAs {
     private val ROOT_1_PEM = """
@@ -57,9 +56,8 @@ object GoogleRootCAs {
 
     val TRUSTED_ROOTS: List<X509Certificate> by lazy {
         val certFactory = CertificateFactory.getInstance("X.509")
-        arrayOf(ROOT_1_PEM, ROOT_2_PEM).map { base64Cert ->
-            val decoded = Base64.getDecoder().decode(base64Cert)
-            certFactory.generateCertificate(decoded.inputStream()) as X509Certificate
+        arrayOf(ROOT_1_PEM, ROOT_2_PEM).map { pem ->
+            certFactory.generateCertificate(pem.byteInputStream()) as X509Certificate
         }
     }
 }

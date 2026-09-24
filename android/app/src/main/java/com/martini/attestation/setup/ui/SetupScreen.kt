@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,7 +22,11 @@ internal fun SetupScreen(
 ) {
     val state by viewModel.setupStateFlow.collectAsStateWithLifecycle()
 
-    Scaffold { innerPadding ->
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = viewModel.snackbarHostState)
+        },
+    ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -29,14 +34,14 @@ internal fun SetupScreen(
             contentAlignment = Alignment.Center
         ) {
             when (state) {
-                is LoadState.Failure, LoadState.Initial -> {
+                is LoadState.Failure, LoadState.Initial, is LoadState.Success -> {
                     ElevatedButton(
                         onClick = viewModel::onStartSetup
                     ) {
                         Text(text = "Verify device")
                     }
                 }
-                is LoadState.Success, LoadState.Loading,  -> {
+                is LoadState.Loading -> {
                     CircularProgressIndicator()
                 }
             }

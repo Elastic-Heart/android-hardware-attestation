@@ -1,6 +1,7 @@
 package org.example
 
 import com.amazonaws.services.lambda.runtime.Context
+import com.amazonaws.services.lambda.runtime.LambdaLogger
 import com.amazonaws.services.lambda.runtime.RequestHandler
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
@@ -25,10 +26,15 @@ class VerifyHandler : RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProx
         input: APIGatewayProxyRequestEvent?,
         context: Context?
     ): APIGatewayProxyResponseEvent? {
-        return try {
-            val request = gson.fromJson(input!!.body, VerifyRequest::class.java)
+        val logger = context?.logger
 
-            if (consumeNonce(request.nonce).not()) {
+        return try {
+            logger?.log("Received verification request. Body: ${input?.body}")
+            val request = gson.fromJson(input!!.body, VerifyRequest::class.java)
+            logger?.log("Parsed request for userId: ${request.userId}, deviceId: ${request.deviceId}")
+
+            if (consumeNonce(request.nonce, logger).not()) {
+                logger?.log("Nonce validation failed for nonce: ${request.nonce}")
                 return buildResponse(
                     statusCode = 400,
                     body = mapOf("error" to "Invalid or expired nonce"),
@@ -41,21 +47,30 @@ class VerifyHandler : RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProx
                 val decoded = Base64.getDecoder().decode(base64Cert)
                 certFactory.generateCertificate(decoded.inputStream()) as X509Certificate
             }
+            logger?.log("Successfully parsed ${certs.size} certificates in the chain.")
 
             certs.zipWithNext { child, parent->
                 child.verify(parent.publicKey)
             }
+
+            logger?.log("Certificate chain signatures verified successfully.")
 
             verifyGoogleRootTrust(certs)
 
             val attData = KeyAttestationParser.parse(certs[0])
 
             if (attData.challenge != request.nonce) {
-                return buildRequestFailedResponse()
+                logger?.log("Nonce mismatch: expected ${request.nonce}, got ${attData.challenge}")
+                return buildRequestFailedResponse(
+                    message = "Invalid nonce for ${request.nonce}",
+                )
             }
 
             if (attData.securityLevel !in 1..2) {
-                return buildRequestFailedResponse()
+                logger?.log("Unsupported security level: ${attData.securityLevel}")
+                return buildRequestFailedResponse(
+                    message = "Invalid security level, should be either TEE or STRONGBOX"
+                )
             }
 
             val verificationLevel = when (attData.securityLevel) {
@@ -72,6 +87,8 @@ class VerifyHandler : RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProx
                 secLevel = verificationLevel
             )
 
+            logger?.log("Successfully saved public key for user: ${request.userId}")
+
             buildResponse(
                 statusCode = 200,
                 body = mapOf(
@@ -79,16 +96,17 @@ class VerifyHandler : RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProx
                     "publicKeyBase64" to publicKeyBase64
                 )
             )
-        } catch (_: Exception) {
-            buildRequestFailedResponse()
+        } catch (e: Exception) {
+            logger?.log("ERROR in VerifyHandler: ${e.message}\n${e.stackTraceToString()}")
+            buildRequestFailedResponse(message = "Bad request")
         }
     }
 
-    private fun buildRequestFailedResponse(): APIGatewayProxyResponseEvent {
-        return buildResponse(400, mapOf("error" to "Verification failed"))
+    private fun buildRequestFailedResponse(message: String): APIGatewayProxyResponseEvent {
+        return buildResponse(400, mapOf("error" to message))
     }
 
-    private fun consumeNonce(nonce: String) : Boolean {
+    private fun consumeNonce(nonce: String, logger: LambdaLogger?) : Boolean {
         return try {
             dynamodb.deleteItem(
                 DeleteItemRequest.builder()
@@ -98,7 +116,8 @@ class VerifyHandler : RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProx
                     .build()
             )
             true
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            logger?.log("Failed to consume nonce '$nonce': ${e.message}")
             false
         }
     }

@@ -326,7 +326,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "275a64102c588dec8903dd418d3c30da91f9e8ad81f3b70738f537065bc53796.zip"
+     "S3Key": "93986484044f3ed1bcc00d46427242f5a1cdf7c5e5cee9258c21ae1aafcd589b.zip"
     },
     "Environment": {
      "Variables": {
@@ -351,7 +351,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "AttestationInfraStack/ChallengeEndpoint/ChallengeHandler/Resource",
-    "aws:asset:path": "asset.275a64102c588dec8903dd418d3c30da91f9e8ad81f3b70738f537065bc53796",
+    "aws:asset:path": "asset.93986484044f3ed1bcc00d46427242f5a1cdf7c5e5cee9258c21ae1aafcd589b",
     "aws:asset:is-bundled": true,
     "aws:asset:property": "Code"
    }
@@ -469,7 +469,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "9f680e33a4ba5d4ff06e433af7d66767bbcca5ca9907af6cab3c90d2edc405f5.jar"
+     "S3Key": "0afd5b30337e09cc841031b552cf3495089e14ed94fbd379e114a2fb2652a3fd.jar"
     },
     "Environment": {
      "Variables": {
@@ -498,7 +498,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "AttestationInfraStack/VerificationEndpoint/VerifyHandler/Resource",
-    "aws:asset:path": "asset.9f680e33a4ba5d4ff06e433af7d66767bbcca5ca9907af6cab3c90d2edc405f5.jar",
+    "aws:asset:path": "asset.0afd5b30337e09cc841031b552cf3495089e14ed94fbd379e114a2fb2652a3fd.jar",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
