@@ -326,7 +326,7 @@
      "S3Bucket": {
       "Fn::Sub": "cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}"
      },
-     "S3Key": "90fca614c4cc07370e9f1b6e224f19115375dfcac0194f5bc5f7a6f475ec54d7.zip"
+     "S3Key": "275a64102c588dec8903dd418d3c30da91f9e8ad81f3b70738f537065bc53796.zip"
     },
     "Environment": {
      "Variables": {
@@ -351,7 +351,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "AttestationInfraStack/ChallengeEndpoint/ChallengeHandler/Resource",
-    "aws:asset:path": "asset.90fca614c4cc07370e9f1b6e224f19115375dfcac0194f5bc5f7a6f475ec54d7",
+    "aws:asset:path": "asset.275a64102c588dec8903dd418d3c30da91f9e8ad81f3b70738f537065bc53796",
     "aws:asset:is-bundled": true,
     "aws:asset:property": "Code"
    }
@@ -481,7 +481,7 @@
       }
      }
     },
-    "Handler": "com.example.VerifyHandler",
+    "Handler": "org.example.VerifyHandler",
     "MemorySize": 1024,
     "Role": {
      "Fn::GetAtt": [

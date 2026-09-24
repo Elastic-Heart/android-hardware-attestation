@@ -21,7 +21,7 @@ export class VerificationService extends Construct {
 
         this.verifyFunction = new lambda.Function(this, 'VerifyHandler', {
             runtime: lambda.Runtime.JAVA_21,
-            handler: 'com.example.VerifyHandler',
+            handler: 'org.example.VerifyHandler',
             code: lambda.Code.fromAsset(
                 path.join(__dirname, '../../../certificate-verification-lambda/verifier/build/libs/verifier-1.0-SNAPSHOT.jar')
             ),
