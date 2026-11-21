@@ -59,4 +59,15 @@ class HardwareKeyManager {
         keyPairGenerator.initialize(specBuilder.build())
         keyPairGenerator.generateKeyPair()
     }
+
+    suspend fun signPayload(data: ByteArray): ByteArray = withContext(Dispatchers.IO) {
+        val keyStore = KeyStore.getInstance(KEYSTORE_PROVIDER).apply { load(null) }
+        val entry = keyStore.getEntry(KEY_ALIAS, null) as? KeyStore.PrivateKeyEntry
+            ?: throw IllegalStateException("Key alias $KEY_ALIAS not found")
+
+        val signature = java.security.Signature.getInstance("SHA256withECDSA")
+        signature.initSign(entry.privateKey)
+        signature.update(data)
+        signature.sign()
+    }
 }

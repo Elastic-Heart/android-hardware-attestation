@@ -62,3 +62,4 @@ bin/
 .externalNativeBuild
 .cxx
 local.properties
+AGENTS.md

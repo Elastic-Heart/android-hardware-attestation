@@ -4,6 +4,7 @@ import { Construct } from 'constructs';
 import { AttestationDatabase } from './constructs/database';
 import { ChallengeService } from './constructs/challenge-service';
 import { VerificationService } from './constructs/verification-service';
+import { PaymentService } from './constructs/payment-service';
 
 export class AttestationInfraStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -23,6 +24,11 @@ export class AttestationInfraStack extends cdk.Stack {
     new VerificationService(this, 'VerificationEndpoint', {
       api: httpApi,
       nonceTable: db.nonceTable,
+      deviceKeysTable: db.deviceKeysTable,
+    });
+
+    new PaymentService(this, 'PaymentEndpoint', {
+      api: httpApi,
       deviceKeysTable: db.deviceKeysTable,
     });
 

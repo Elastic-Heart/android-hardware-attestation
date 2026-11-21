@@ -8,4 +8,5 @@ val appModule = module {
     includes(networkModule)
     includes(cryptoModule)
     includes(setupModule)
+    includes(com.martini.attestation.payment.di.paymentModule)
 }

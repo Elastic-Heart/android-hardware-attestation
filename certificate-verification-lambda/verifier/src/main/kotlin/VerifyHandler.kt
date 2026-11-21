@@ -14,13 +14,18 @@ import software.amazon.awssdk.services.dynamodb.model.PutItemRequest
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 import java.util.*
+import java.util.HexFormat
 
-class VerifyHandler : RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+class VerifyHandler @JvmOverloads constructor(
+    private val dynamodb: DynamoDbClient = DynamoDbClient.create(),
+    private val nonceTableName: String = System.getenv("NONCE_TABLE_NAME") ?: "",
+    private val deviceKeysTableName: String = System.getenv("DEVICE_KEYS_TABLE_NAME") ?: "",
+    private val expectedPackageName: String = System.getenv("EXPECTED_PACKAGE_NAME") ?: "com.martini.attestation",
+    private val expectedSignatureDigestEnv: String = System.getenv("EXPECTED_SIGNATURE_DIGEST") ?: "",
+    private val trustedRoots: List<X509Certificate> = GoogleRootCAs.TRUSTED_ROOTS
+) : RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
     private val gson = Gson()
-    private val dynamodb = DynamoDbClient.create()
-    private val nonceTableName = System.getenv("NONCE_TABLE_NAME") ?: ""
-    private val deviceKeysTableName = System.getenv("DEVICE_KEYS_TABLE_NAME") ?: ""
 
     override fun handleRequest(
         input: APIGatewayProxyRequestEvent?,
@@ -64,6 +69,37 @@ class VerifyHandler : RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProx
                 return buildRequestFailedResponse(
                     message = "Invalid nonce for ${request.nonce}",
                 )
+            }
+
+            val appId = attData.applicationId
+            if (appId == null) {
+                logger?.log("Missing attestation application ID in certificate")
+                return buildRequestFailedResponse("Missing attestation application ID in certificate")
+            }
+
+            if (appId.packageInfos.none { it.packageName == expectedPackageName }) {
+                logger?.log("Application ID package mismatch: expected $expectedPackageName, got ${appId.packageInfos.map { it.packageName }}")
+                return buildRequestFailedResponse("Application ID package mismatch")
+            }
+
+            if (expectedSignatureDigestEnv.isBlank()) {
+                logger?.log("EXPECTED_SIGNATURE_DIGEST is not configured")
+                return buildRequestFailedResponse("Missing or empty expected signature digest configuration")
+            }
+
+            val expectedDigests = parseExpectedDigests(expectedSignatureDigestEnv)
+            if (expectedDigests.isEmpty()) {
+                logger?.log("No valid expected signature digests parsed")
+                return buildRequestFailedResponse("Missing or empty expected signature digest configuration")
+            }
+
+            val hasMatchingDigest = appId.signatureDigests.any { actualDigest ->
+                expectedDigests.any { expectedDigest -> actualDigest.contentEquals(expectedDigest) }
+            }
+
+            if (!hasMatchingDigest) {
+                logger?.log("Signature digest mismatch")
+                return buildRequestFailedResponse("Application ID signature digest mismatch")
             }
 
             if (attData.securityLevel !in 1..2) {
@@ -125,7 +161,7 @@ class VerifyHandler : RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProx
     private fun verifyGoogleRootTrust(certs: List<X509Certificate>) {
         val topCert = certs.last()
 
-        val isSignedByGoogle = GoogleRootCAs.TRUSTED_ROOTS.any { googleRoot ->
+        val isSignedByGoogle = trustedRoots.any { googleRoot ->
             try {
                 topCert.verify(googleRoot.publicKey)
                 true
@@ -135,6 +171,20 @@ class VerifyHandler : RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProx
         }
 
         if (!isSignedByGoogle) throw SecurityException("Google root certificate is not signed in")
+    }
+
+    private fun parseExpectedDigests(raw: String): List<ByteArray> {
+        val hexFormat = HexFormat.of()
+        return raw.split(",")
+            .map { it.trim().replace(":", "").replace(" ", "").lowercase() }
+            .filter { it.isNotEmpty() }
+            .mapNotNull { hex ->
+                try {
+                    hexFormat.parseHex(hex)
+                } catch (_: Exception) {
+                    null
+                }
+            }
     }
 
     private fun savePublicKey(userId: String, deviceId: String, publicKey: String, secLevel: String) {
