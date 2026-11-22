@@ -17,14 +17,15 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"github.com/shopspring/decimal"
 )
 
 type PaymentRequest struct {
-	UserID          string  `json:"userId"`
-	DeviceID        string  `json:"deviceId"`
-	Recipient       string  `json:"recipient"`
-	Amount          float64 `json:"amount"`
-	SignatureBase64 string  `json:"signatureBase64"`
+	UserID          string          `json:"userId"`
+	DeviceID        string          `json:"deviceId"`
+	Recipient       string          `json:"recipient"`
+	Amount          decimal.Decimal `json:"amount"`
+	SignatureBase64 string          `json:"signatureBase64"`
 }
 
 type PaymentResponse struct {
@@ -147,7 +148,7 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 		return errorResponse(400, "Failed to decode signature"), nil
 	}
 
-	payload := []byte(fmt.Sprintf("%s:%f", body.Recipient, body.Amount))
+	payload := []byte(fmt.Sprintf("%s:%s", body.Recipient, body.Amount.String()))
 	hash := sha256.Sum256(payload)
 
 	if !ecdsa.VerifyASN1(ecdsaPubKey, hash[:], signatureBytes) {

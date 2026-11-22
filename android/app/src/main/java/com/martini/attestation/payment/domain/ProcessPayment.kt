@@ -4,12 +4,13 @@ import android.util.Base64
 import com.martini.attestation.crypto.HardwareKeyManager
 import com.martini.attestation.payment.data.model.PaymentRequest
 import com.martini.attestation.payment.data.repositories.PaymentRepository
+import java.math.BigDecimal
 
 class ProcessPayment(
     private val paymentRepository: PaymentRepository,
-    private val hardwareKeyManager: HardwareKeyManager
+    private val hardwareKeyManager: HardwareKeyManager,
 ) {
-    suspend operator fun invoke(userId: String, deviceId: String, recipient: String, amount: Double): Result<Unit> {
+    suspend operator fun invoke(userId: String, deviceId: String, recipient: String, amount: BigDecimal): Result<Unit> {
         return try {
             val payload = "$recipient:$amount".toByteArray(Charsets.UTF_8)
             val signature = hardwareKeyManager.signPayload(payload)
