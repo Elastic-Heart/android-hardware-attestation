@@ -13,7 +13,7 @@ class SetupDevice(
     private val userId = UUID.randomUUID().toString()
     private val deviceId = UUID.randomUUID().toString()
 
-    suspend operator fun invoke() : LoadState<Unit, Throwable> {
+    suspend operator fun invoke() : LoadState<DeviceCredentials, Throwable> {
         val nonceResult = repository.getNonce(userId)
 
         if (nonceResult.isFailure) return LoadState.Failure(nonceResult.exceptionOrNull()!!)
@@ -29,6 +29,8 @@ class SetupDevice(
 
         if (verificationResult.isFailure) return LoadState.Failure(verificationResult.exceptionOrNull()!!)
 
-        return LoadState.Success(Unit)
+        return LoadState.Success(DeviceCredentials(userId, deviceId))
     }
 }
+
+data class DeviceCredentials(val userId: String, val deviceId: String)

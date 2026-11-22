@@ -18,8 +18,9 @@ class MainActivity : ComponentActivity() {
                 val setupViewModel: com.martini.attestation.setup.ui.SetupViewModel = org.koin.androidx.compose.koinViewModel()
                 val setupState by setupViewModel.setupStateFlow.collectAsStateWithLifecycle()
 
-                if (setupState is com.martini.attestation.common.LoadState.Success<*>) {
-                    com.martini.attestation.payment.ui.PaymentScreen()
+                if (setupState is com.martini.attestation.common.LoadState.Success) {
+                    val credentials = (setupState as com.martini.attestation.common.LoadState.Success<com.martini.attestation.setup.domain.DeviceCredentials>).data
+                    com.martini.attestation.payment.ui.PaymentScreen(userId = credentials.userId, deviceId = credentials.deviceId)
                 } else {
                     SetupScreen(viewModel = setupViewModel)
                 }

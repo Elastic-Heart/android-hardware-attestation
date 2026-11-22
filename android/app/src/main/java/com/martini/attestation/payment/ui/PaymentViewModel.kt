@@ -11,6 +11,8 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 
 class PaymentViewModel(
+    private val userId: String,
+    private val deviceId: String,
     private val processPayment: ProcessPayment
 ) : ViewModel() {
     val snackbarHostState = SnackbarHostState()
@@ -43,8 +45,8 @@ class PaymentViewModel(
         viewModelScope.launch {
              // Hardcoded user id and device id for PoC
              val result = processPayment(
-                 userId = "user-123",
-                 deviceId = "device-123",
+                 userId = userId,
+                 deviceId = deviceId,
                  recipient = currentRecipient,
                  amount = currentAmount
              )

@@ -63,3 +63,4 @@ bin/
 .cxx
 local.properties
 AGENTS.md
+agent_features/**

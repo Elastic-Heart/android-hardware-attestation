@@ -16,7 +16,7 @@ class SetupViewModel(
 
     val snackbarHostState = SnackbarHostState()
 
-    private val _setupStateFlow = MutableStateFlow<LoadState<Unit, Throwable>>(LoadState.Initial )
+    private val _setupStateFlow = MutableStateFlow<LoadState<com.martini.attestation.setup.domain.DeviceCredentials, Throwable>>(LoadState.Initial )
     val setupStateFlow = _setupStateFlow.asStateFlow()
 
     fun onStartSetup() {

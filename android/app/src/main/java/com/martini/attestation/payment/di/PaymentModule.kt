@@ -12,5 +12,5 @@ val paymentModule = module {
     single { PaymentApiService(get<HttpClient>()) }
     single { PaymentRepository(get<PaymentApiService>()) }
     factory { ProcessPayment(get<PaymentRepository>(), get()) }
-    viewModel { PaymentViewModel(get()) }
+    viewModel { params -> PaymentViewModel(userId = params.get(), deviceId = params.get(), processPayment = get()) }
 }
