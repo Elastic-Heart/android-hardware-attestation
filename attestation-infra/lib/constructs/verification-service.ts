@@ -23,7 +23,7 @@ export class VerificationService extends Construct {
             runtime: lambda.Runtime.JAVA_21,
             handler: 'org.example.VerifyHandler',
             code: lambda.Code.fromAsset(
-                path.join(__dirname, '../../../certificate-verification-lambda/verifier/build/libs/verifier-1.0-SNAPSHOT.jar')
+                path.join(__dirname, '../../../certificate-verification-lambda/verifier/build/libs/verifier-1.0-SNAPSHOT-all.jar')
             ),
             memorySize: 1024,
             timeout: cdk.Duration.seconds(10),

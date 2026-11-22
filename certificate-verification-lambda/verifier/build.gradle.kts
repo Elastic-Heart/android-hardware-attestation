@@ -35,7 +35,7 @@ tasks.test {
 }
 
 tasks.shadowJar {
-    archiveClassifier.set("")
+    archiveClassifier.set("all")
     manifest {
         attributes["Main-Class"] = "com.example.VerifyHandler"
     }
